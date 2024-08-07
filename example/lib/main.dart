@@ -5,6 +5,10 @@ import 'dart:typed_data';
 import 'package:epson_epos/epson_epos.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+final logger = Logger();
 
 void main() {
   runApp(MyApp());
@@ -46,7 +50,7 @@ class _MyAppState extends State<MyApp> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              Column(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   ElevatedButton(
@@ -58,9 +62,12 @@ class _MyAppState extends State<MyApp> {
                   ElevatedButton(
                       onPressed: () => onDiscovery(EpsonEPOSPortType.BLUETOOTH),
                       child: Text('Discovery Bluetooth')),
+                  // ElevatedButton(
+                  //     onPressed: () => onDiscovery(EpsonEPOSPortType.ALL),
                   ElevatedButton(
-                      onPressed: () => onDiscovery(EpsonEPOSPortType.ALL),
-                      child: Text('Discovery All')),
+                      onPressed: () => onBleRequestPermission(),
+                      child: Text(
+                          'Request runtime permission')), //     child: Text('Discovery All')),
                 ],
               ),
               Flexible(
@@ -98,7 +105,7 @@ class _MyAppState extends State<MyApp> {
       List<EpsonPrinterModel>? data = await EpsonEPOS.onDiscovery(type: type);
       if (data != null && data.length > 0) {
         data.forEach((element) {
-          print(element.toJson());
+          logger.d(element.toJson());
         });
         setState(() {
           printers = data;
@@ -109,7 +116,7 @@ class _MyAppState extends State<MyApp> {
         });
       }
     } catch (e) {
-      log("Error: " + e.toString());
+      logger.e("Error: " + e.toString());
     }
   }
 
@@ -117,7 +124,7 @@ class _MyAppState extends State<MyApp> {
     try {
       await EpsonEPOS.setPrinterSetting(printer, paperWidth: 80);
     } catch (e) {
-      log("Error: " + e.toString());
+      logger.e("Error: " + e.toString());
     }
   }
 
@@ -125,52 +132,53 @@ class _MyAppState extends State<MyApp> {
     final profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm58, profile);
     List<int> bytes = [];
+    generator.setGlobalCodeTable('TCVN-3-1');
 
-    bytes += generator.text(
-        'Regular: aA bB cC dD eE fF gG hH iI jJ kK lL mM nN oO pP qQ rR sS tT uU vV wW xX yY zZ');
-    bytes += generator.text('Special 1: àÀ èÈ éÉ ûÛ üÜ çÇ ôÔ',
-        styles: const PosStyles(codeTable: 'CP1252'));
-    bytes += generator.text('Special 2: blåbærgrød',
-        styles: const PosStyles(codeTable: 'CP1252'));
+    // bytes += generator.text(
+    //     'Regular: aA bB cC dD eE fF gG hH iI jJ kK lL mM nN oO pP qQ rR sS tT uU vV wW xX yY zZ');
+    // bytes += generator.text('Special 1: àÀ èÈ éÉ ûÛ üÜ çÇ ôÔ',
+    //     styles: const PosStyles(codeTable: 'CP1252'));
+    // bytes += generator.text('Special 2: blåbærgrød',
+    //     styles: const PosStyles(codeTable: 'CP1252'));
 
-    bytes += generator.text('Bold text', styles: const PosStyles(bold: true));
-    bytes +=
-        generator.text('Reverse text', styles: const PosStyles(reverse: true));
-    bytes += generator.text('Underlined text',
-        styles: const PosStyles(underline: true), linesAfter: 1);
-    bytes += generator.text('Align left',
-        styles: const PosStyles(align: PosAlign.left));
-    bytes += generator.text('Align center',
-        styles: const PosStyles(align: PosAlign.center));
-    bytes += generator.text('Align right',
-        styles: const PosStyles(align: PosAlign.right), linesAfter: 1);
-    bytes += generator.qrcode('Barcode by escpos',
-        size: QRSize.Size4, cor: QRCorrection.H);
-    bytes += generator.feed(2);
+    // bytes += generator.text('Bold text', styles: const PosStyles(bold: true));
+    // bytes +=
+    //     generator.text('Reverse text', styles: const PosStyles(reverse: true));
+    // bytes += generator.text('Underlined text',
+    //     styles: const PosStyles(underline: true), linesAfter: 1);
+    // bytes += generator.text('Align left',
+    //     styles: const PosStyles(align: PosAlign.left));
+    // bytes += generator.text('Align center',
+    //     styles: const PosStyles(align: PosAlign.center));
+    // bytes += generator.text('Align right',
+    //     styles: const PosStyles(align: PosAlign.right), linesAfter: 1);
+    // bytes += generator.qrcode('Barcode by escpos',
+    //     size: QRSize.Size4, cor: QRCorrection.H);
+    // bytes += generator.feed(2);
 
-    bytes += generator.row([
-      PosColumn(
-        text: 'col3',
-        width: 3,
-        styles: const PosStyles(align: PosAlign.center, underline: true),
-      ),
-      PosColumn(
-        text: 'col6',
-        width: 6,
-        styles: const PosStyles(align: PosAlign.center, underline: true),
-      ),
-      PosColumn(
-        text: 'col3',
-        width: 3,
-        styles: const PosStyles(align: PosAlign.center, underline: true),
-      ),
-    ]);
+    // bytes += generator.row([
+    //   PosColumn(
+    //     text: 'col3',
+    //     width: 3,
+    //     styles: const PosStyles(align: PosAlign.center, underline: true),
+    //   ),
+    //   PosColumn(
+    //     text: 'col6',
+    //     width: 6,
+    //     styles: const PosStyles(align: PosAlign.center, underline: true),
+    //   ),
+    //   PosColumn(
+    //     text: 'col3',
+    //     width: 3,
+    //     styles: const PosStyles(align: PosAlign.center, underline: true),
+    //   ),
+    // ]);
 
-    bytes += generator.text('Text size 200%',
-        styles: const PosStyles(
-          height: PosTextSize.size2,
-          width: PosTextSize.size2,
-        ));
+    // bytes += generator.text('Text size 200%',
+    //     styles: const PosStyles(
+    //       height: PosTextSize.size2,
+    //       width: PosTextSize.size2,
+    //     ));
 
     bytes += generator.reset();
 
@@ -182,10 +190,20 @@ class _MyAppState extends State<MyApp> {
     List<Map<String, dynamic>> commands = [];
     commands.add(command.addTextAlign(EpsonEPOSTextAlign.LEFT));
     commands.add(command.addFeedLine(4));
-    commands.add(command.append('PRINT TESTE OK!\n'));
+    commands.add(command.append('một vùng nông nghiệp trù phú\n'));
     commands.add(command.rawData(Uint8List.fromList(await _customEscPos())));
     commands.add(command.addFeedLine(4));
     commands.add(command.addCut(EpsonEPOSCut.CUT_FEED));
     await EpsonEPOS.onPrint(printer, commands);
+  }
+
+  void onBleRequestPermission() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.location,
+      Permission.bluetooth,
+      Permission.bluetoothConnect,
+      Permission.bluetoothScan,
+    ].request();
+    print(statuses[Permission.location]);
   }
 }

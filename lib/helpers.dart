@@ -21,7 +21,8 @@ class EpsonEPOSHelper {
   EPSONSeries? getSeries(String modelName) {
     if (modelName.isEmpty) return null;
     return epsonSeries.firstWhere(
-        (element) => element.models.contains(modelName),
+        (element) => element.models.any((model) =>
+            modelName.startsWith(model)), //element.models.contains(modelName),
         orElse: null);
   }
 }

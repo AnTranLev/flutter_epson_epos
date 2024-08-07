@@ -1,25 +1,29 @@
 package com.tlt.epson_epos
 
+import android.Manifest
 import android.app.Activity
-import androidx.annotation.NonNull
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.location.LocationRequest
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.util.Base64
 import android.util.Log
-import com.epson.epos2.Log as PrintLog;
-import com.google.gson.Gson
-import com.epson.epos2.Epos2Exception;
-import com.epson.epos2.discovery.Discovery;
-import com.epson.epos2.discovery.DiscoveryListener;
-import com.epson.epos2.discovery.DeviceInfo;
-import com.epson.epos2.discovery.FilterOption;
-import com.epson.epos2.printer.Printer;
-import com.epson.epos2.printer.PrinterStatusInfo;
+import androidx.annotation.NonNull
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.epson.epos2.Epos2Exception
+import com.epson.epos2.discovery.Discovery
+import com.epson.epos2.discovery.DiscoveryListener
+import com.epson.epos2.discovery.FilterOption
+import com.epson.epos2.printer.Printer
 import com.epson.epos2.printer.PrinterSettingListener
+import com.epson.epos2.printer.PrinterStatusInfo
 import com.epson.epos2.printer.ReceiveListener
-
+import com.google.gson.Gson
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -27,11 +31,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import java.lang.Exception
-import kotlin.collections.ArrayList
-import android.util.Base64
-
-import java.lang.StringBuilder
+import com.epson.epos2.Log as PrintLog
 
 
 interface JSONConvertable {
@@ -73,7 +73,7 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
   private var printers: MutableList<EpsonEposPrinterInfo> = ArrayList()
 
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
-    activity = binding.activity;
+    activity = binding.activity
   }
 
   override fun onDetachedFromActivityForConfigChanges() {
@@ -143,6 +143,9 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         "setPrinterSetting" -> {
           setPrinterSetting(call, result)
         }
+        "requestRuntimePermission" -> {
+          requestRuntimePermission(call, result)
+        }
         else -> {
           Log.d(logTag, "Method: ${call.method} is not supported yet")
           result.notImplemented()
@@ -209,7 +212,7 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
    * Discovery Printers GENERIC
    */
   private fun onDiscoveryPrinter(@NonNull call: MethodCall, portType: Int, @NonNull result: Result) {
-    var delay:Long = 7000;
+    var delay:Long = 10000;
     if(portType == Discovery.PORTTYPE_USB){
       delay = 1000;
     }
@@ -769,5 +772,134 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     return errorMes
   }
 
+  private val _REQUEST_PERMISSION = 100
+  private fun requestRuntimePermission(@NonNull call: MethodCall, @NonNull result: Result) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+      result.notImplemented()
+      return
+    }
+    val requestPermissions: ArrayList<String> = ArrayList()
+    if (Build.VERSION_CODES.S <= Build.VERSION.SDK_INT) {
+      // If your app targets Android 12 (API level 31) and higher, it's recommended that you declare BLUETOOTH permission.
+      val permissionBluetoothScan: Int =
+        ContextCompat.checkSelfPermission(activity, Manifest.permission.BLUETOOTH_SCAN)
+      val permissionBluetoothConnect: Int =
+        ContextCompat.checkSelfPermission(activity, Manifest.permission.BLUETOOTH_CONNECT)
+      if (permissionBluetoothScan == PackageManager.PERMISSION_DENIED) {
+        requestPermissions.add(Manifest.permission.BLUETOOTH_SCAN)
+      }
+      if (permissionBluetoothConnect == PackageManager.PERMISSION_DENIED) {
+        requestPermissions.add(Manifest.permission.BLUETOOTH_CONNECT)
+      }
+    } else if (Build.VERSION_CODES.Q <= Build.VERSION.SDK_INT && Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
+      // If your app targets Android 11 (API level 30) or lower, it's necessary that you declare ACCESS_FINE_LOCATION permission.
+      val permissionLocationFine: Int =
+        ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
+      if (permissionLocationFine == PackageManager.PERMISSION_DENIED) {
+        requestPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+      }
+    } else {
+      // If your app targets Android 9 (API level 28) or lower, you can declare the ACCESS_COARSE_LOCATION permission instead of the ACCESS_FINE_LOCATION permission.
+      val permissionLocationCoarse: Int =
+        ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+      if (permissionLocationCoarse == PackageManager.PERMISSION_DENIED) {
+        requestPermissions.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+      }
+    }
+    if (requestPermissions.isNotEmpty()) {
+      ActivityCompat.requestPermissions(
+        activity,
+        requestPermissions.toArray(arrayOfNulls<String>(requestPermissions.size)),
+        _REQUEST_PERMISSION
+      )
+    }
+  }
 
+//  @Override
+//  fun onRequestPermissionsResult(
+//    requestCode: Int,
+//    @NonNull permissions: Array<String>,
+//    @NonNull grantResults: IntArray
+//  ) {
+//    if (requestCode != _REQUEST_PERMISSION || grantResults.isEmpty()) {
+//      return
+//    }
+//    val requestPermissions: ArrayList<String> = ArrayList()
+//    for (i in permissions.indices) {
+//      if (Build.VERSION_CODES.S <= Build.VERSION.SDK_INT) {
+//        // If your app targets Android 12 (API level 31) and higher, it's recommended that you declare BLUETOOTH permission.
+//        if (permissions[i] == Manifest.permission.BLUETOOTH_SCAN
+//          && grantResults[i] == PackageManager.PERMISSION_DENIED
+//        ) {
+//          requestPermissions.add(permissions[i])
+//        }
+//        if (permissions[i] == Manifest.permission.BLUETOOTH_CONNECT
+//          && grantResults[i] == PackageManager.PERMISSION_DENIED
+//        ) {
+//          requestPermissions.add(permissions[i])
+//        }
+//      } else if (Build.VERSION_CODES.Q <= Build.VERSION.SDK_INT && Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
+//        // If your app targets Android 11 (API level 30) or lower, it's necessary that you declare ACCESS_FINE_LOCATION permission.
+//        if (permissions[i] == Manifest.permission.ACCESS_FINE_LOCATION
+//          && grantResults[i] == PackageManager.PERMISSION_DENIED
+//        ) {
+//          requestPermissions.add(permissions[i])
+//        }
+//      } else {
+//        // If your app targets Android 9 (API level 28) or lower, you can declare the ACCESS_COARSE_LOCATION permission instead of the ACCESS_FINE_LOCATION permission.
+//        if (permissions[i] == Manifest.permission.ACCESS_COARSE_LOCATION
+//          && grantResults[i] == PackageManager.PERMISSION_DENIED
+//        ) {
+//          requestPermissions.add(permissions[i])
+//        }
+//      }
+//    }
+//    if (!requestPermissions.isEmpty()) {
+//      ActivityCompat.requestPermissions(
+//        activity,
+//        requestPermissions.toArray(arrayOfNulls<String>(requestPermissions.size)),
+//        _REQUEST_PERMISSION
+//      )
+//    }
+//  }
+//
+//  //When searching for a device running on Android 10 or later as a Bluetooth-capable device, enable access to location information of the device.
+//  private fun enableLocationSetting() {
+//    val locationRequest: LocationRequest = LocationRequest.create()
+//    locationRequest.setInterval(10000)
+//    locationRequest.setFastestInterval(5000)
+//    locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+//    val builder: LocationSettingsRequest.Builder = Builder()
+//      .addLocationRequest(locationRequest)
+//    val client: SettingsClient = LocationServices.getSettingsClient(this)
+//    val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
+//    task.addOnSuccessListener(this, object : OnSuccessListener<LocationSettingsResponse?>() {
+//      @Override
+//      fun onSuccess(locationSettingsResponse: LocationSettingsResponse?) {
+//        // All location settings are satisfied. The client can initialize
+//        // location requests here.
+//        // ...
+//      }
+//    })
+//    task.addOnFailureListener(this, object : OnFailureListener() {
+//      @Override
+//      fun onFailure(@NonNull e: Exception) {
+//        if (e is ResolvableApiException) {
+//          // Location settings are not satisfied, but this can be fixed
+//          // by showing the user a dialog.
+//          try {
+//            // Show the dialog by calling startResolutionForResult(),
+//            // and check the result in onActivityResult().
+//            val resolvable: ResolvableApiException = e as ResolvableApiException
+//            resolvable.startResolutionForResult(
+//              this@MainActivity,
+//              CommonStatusCodes.RESOLUTION_REQUIRED
+//            )
+//          } catch (sendEx: IntentSender.SendIntentException) {
+//            // Ignore the error.
+//          }
+//        }
+//      }
+//    })
+//  }
 }
