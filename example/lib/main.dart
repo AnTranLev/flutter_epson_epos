@@ -204,6 +204,6 @@ class _MyAppState extends State<MyApp> {
       Permission.bluetoothConnect,
       Permission.bluetoothScan,
     ].request();
-    print(statuses[Permission.location]);
+    logger.d(statuses[Permission.bluetooth]);
   }
 }

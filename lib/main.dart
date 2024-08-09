@@ -13,7 +13,7 @@ class EpsonEPOS {
   static EpsonEPOSHelper _eposHelper = EpsonEPOSHelper();
 
   static bool _isPrinterPlatformSupport({bool throwError = false}) {
-    if (Platform.isAndroid) return true;
+    if (Platform.isAndroid || Platform.isIOS) return true;
     if (throwError) {
       throw PlatformException(
           code: "platformNotSupported", message: "Device not supported");
