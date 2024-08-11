@@ -53,6 +53,13 @@ public class EpsonEposPrinterResult: NSObject, Codable {
             try content.encode(to: container.superEncoder(forKey: .content))
         }
     }
+    
+    public func toJSONString() throws -> String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        let data = try encoder.encode(self)
+        return String(data: data, encoding: .utf8)!
+    }
 }
 
 /**

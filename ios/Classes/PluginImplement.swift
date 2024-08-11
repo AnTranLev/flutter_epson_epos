@@ -12,7 +12,7 @@ import Combine
 class PluginImplement: NSObject {
     private var cancellable = Set<AnyCancellable>()
     
-    fileprivate var printerList: [Epos2DeviceInfo] = []
+    fileprivate var printers: [EpsonEposPrinterInfo] = []
     fileprivate var filterOption: Epos2FilterOption = Epos2FilterOption()
     
     fileprivate var result: FlutterResult?
@@ -32,6 +32,7 @@ class PluginImplement: NSObject {
         var resp = EpsonEposPrinterResult.init(type: PluginMethods.onDiscovery.rawValue, success: false)
         if response != EPOS2_SUCCESS.rawValue {
             resp.message = MessageHelper.errorEpos(response, method: "start")
+            return result(try? resp.toJSONString())
         }
         
         Timer.publish(every: Constants.discoverLookupInterval, on: .main, in: .common)
@@ -41,15 +42,29 @@ class PluginImplement: NSObject {
                 // Stop discover
                 Epos2Discovery.stop()
                 
-                // TODO: return the result
-//                self?.result(<#T##Any?#>)
+                guard let self = self, let result = self.result else {
+                    return
+                }
+                
+                // return the result
+                var resp = EpsonEposPrinterResult.init(type: PluginMethods.onDiscovery.rawValue, success: true)
+                resp.content = printers
+                do {
+                    let data = try resp.toJSONString()
+                    result(data)
+                } catch let error {
+                    resp = EpsonEposPrinterResult.init(type: PluginMethods.onDiscovery.rawValue, success: true)
+                    resp.success = false
+                    resp.message = error.localizedDescription
+                    result(try? resp.toJSONString())
+                }
             })
             .store(in: &cancellable)
     }
     
     public func connectDevice() {
         Epos2Discovery.stop()
-        printerList.removeAll()
+        printers.removeAll()
         
         let btConnection = Epos2BluetoothConnection()
         let BDAddress = NSMutableString()
@@ -81,7 +96,7 @@ class PluginImplement: NSObject {
             }
         }
         
-        printerList.removeAll()
+        printers.removeAll()
 //        printerView.reloadData()
 
         result = Epos2Discovery.start(filterOption, delegate:self)
@@ -93,17 +108,17 @@ class PluginImplement: NSObject {
 
 extension PluginImplement: Epos2DiscoveryDelegate {
     func onDiscovery(_ deviceInfo: Epos2DeviceInfo!) {
+        guard let printer = EpsonEposPrinterInfo.printer(from: deviceInfo) else {
+            return
+        }
+        var printerIndex = printers.firstIndex(where: { e in
+            e.ipAddress == deviceInfo.ipAddress
+        })
         
-//        if (deviceInfo.deviceName != nil && deviceInfo.deviceName.isEmpty == false) {
-//            var printer = EpsonEposPrinterInfo(deviceInfo.ipAddress,  deviceInfo.bdAddress , deviceInfo.macAddress,  deviceInfo.deviceName , deviceInfo.deviceType.toString(), deviceInfo.deviceType.toString()  , deviceInfo.target)
-//            var printerIndex = printers.indexOfFirst { e -> e.ipAddress == deviceInfo.ipAddress }
-//            if (printerIndex > -1) {
-//                printers[printerIndex] = printer
-//            } else {
-//                printers.add(printer)
-//            }
-//        }
-        printerList.append(deviceInfo)
-//        result?(<#T##Any?#>)
+        if let index = printerIndex, index > -1 {
+            printers[index] = printer
+        } else {
+            printers.append(printer)
+        }
     }
 }
