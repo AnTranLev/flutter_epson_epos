@@ -64,4 +64,7 @@
     "err_wait_removal" = "Please remove paper.\n";
     "err_voltage" = "Please check the voltage status.\n";
     "wait" = "Please wait...";
+    
+    "error_missing_print_data" = "Please provide all print data";
+    "error_not_support_printer" = "Not support printer";
 }

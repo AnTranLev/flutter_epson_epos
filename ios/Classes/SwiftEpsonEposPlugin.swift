@@ -11,12 +11,16 @@ public class SwiftEpsonEposPlugin: NSObject, FlutterPlugin {
     private var pluginImplement = PluginImplement()
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        if call.method == PluginMethods.onDiscovery.rawValue {
+        switch call.method {
+        case PluginMethods.onDiscovery.rawValue:
             pluginImplement.onDiscovery(call, result: result)
-            return
+            
+        case PluginMethods.onPrint.rawValue:
+            pluginImplement.onPrint(call, result: result)
+            
+        default:
+            result(FlutterMethodNotImplemented)
         }
-        
-        result(FlutterMethodNotImplemented)
     }
     
     

@@ -53,12 +53,12 @@ class _MyAppState extends State<MyApp> {
               Column(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  ElevatedButton(
-                      onPressed: () => onDiscovery(EpsonEPOSPortType.TCP),
-                      child: Text('Discovery TCP')),
-                  ElevatedButton(
-                      onPressed: () => onDiscovery(EpsonEPOSPortType.USB),
-                      child: Text('Discovery USB')),
+                  // ElevatedButton(
+                  //     onPressed: () => onDiscovery(EpsonEPOSPortType.TCP),
+                  //     child: Text('Discovery TCP')),
+                  // ElevatedButton(
+                  //     onPressed: () => onDiscovery(EpsonEPOSPortType.USB),
+                  //     child: Text('Discovery USB')),
                   ElevatedButton(
                       onPressed: () => onDiscovery(EpsonEPOSPortType.BLUETOOTH),
                       child: Text('Discovery Bluetooth')),
@@ -98,8 +98,6 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  buildPrinter() {}
-
   onDiscovery(EpsonEPOSPortType type) async {
     try {
       List<EpsonPrinterModel>? data = await EpsonEPOS.onDiscovery(type: type);
@@ -130,7 +128,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<List<int>> _customEscPos() async {
     final profile = await CapabilityProfile.load();
-    final generator = Generator(PaperSize.mm58, profile);
+    final generator = Generator(PaperSize.mm80, profile);
     List<int> bytes = [];
     generator.setGlobalCodeTable('TCVN-3-1');
 
@@ -141,15 +139,16 @@ class _MyAppState extends State<MyApp> {
     // bytes += generator.text('Special 2: blåbærgrød',
     //     styles: const PosStyles(codeTable: 'CP1252'));
 
-    // bytes += generator.text('Bold text', styles: const PosStyles(bold: true));
+    bytes += generator.text('Thoát nghe tim đập rộn ràng Cất lên tiếng,',
+        styles: const PosStyles(bold: true));
     // bytes +=
     //     generator.text('Reverse text', styles: const PosStyles(reverse: true));
     // bytes += generator.text('Underlined text',
     //     styles: const PosStyles(underline: true), linesAfter: 1);
     // bytes += generator.text('Align left',
     //     styles: const PosStyles(align: PosAlign.left));
-    // bytes += generator.text('Align center',
-    //     styles: const PosStyles(align: PosAlign.center));
+    bytes += generator.text('Đây hồ Than Thở ngất ngây',
+        styles: const PosStyles(align: PosAlign.center));
     // bytes += generator.text('Align right',
     //     styles: const PosStyles(align: PosAlign.right), linesAfter: 1);
     // bytes += generator.qrcode('Barcode by escpos',
@@ -189,12 +188,14 @@ class _MyAppState extends State<MyApp> {
     EpsonEPOSCommand command = EpsonEPOSCommand();
     List<Map<String, dynamic>> commands = [];
     commands.add(command.addTextAlign(EpsonEPOSTextAlign.LEFT));
-    commands.add(command.addFeedLine(4));
-    commands.add(command.append('một vùng nông nghiệp trù phú\n'));
+    commands.add(command.addFeedLine(1));
+    commands
+        .add(command.append('Đây bước chân kẻ phong trần Lang thang cõi\n'));
     commands.add(command.rawData(Uint8List.fromList(await _customEscPos())));
-    commands.add(command.addFeedLine(4));
+    commands.add(command.addFeedLine(2));
     commands.add(command.addCut(EpsonEPOSCut.CUT_FEED));
-    await EpsonEPOS.onPrint(printer, commands);
+    final response = await EpsonEPOS.onPrint(printer, commands);
+    logger.d(response.toString());
   }
 
   void onBleRequestPermission() async {
