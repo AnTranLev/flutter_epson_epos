@@ -28,9 +28,11 @@ public class CommandGenerator: NSObject {
             printer.addText(commandValue);
             
         case "printRawData":
-            guard let commandValue = commandValue as? Data else { return }
+            guard let commandValue = commandValue as? FlutterStandardTypedData
+ else { return }
+            let data = Data(commandValue.data)
             //                    Log.d(logTag, "printRawData")
-            printer.addCommand(commandValue)
+            printer.addCommand(data)
             
         case "addImage":
             guard let commandValue = commandValue as? String else { return }

@@ -212,7 +212,7 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
    * Discovery Printers GENERIC
    */
   private fun onDiscoveryPrinter(@NonNull call: MethodCall, portType: Int, @NonNull result: Result) {
-    var delay:Long = 10000;
+    var delay:Long = 7000;
     if(portType == Discovery.PORTTYPE_USB){
       delay = 1000;
     }

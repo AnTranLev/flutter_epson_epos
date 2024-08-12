@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:typed_data';
 
+import 'package:epson_epos/charset/charset.dart';
 import 'package:epson_epos/epson_epos.dart';
-import 'package:esc_pos_utils/esc_pos_utils.dart';
+import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
+import 'package:esc_pos_utils_plus/gbk_codec/src/converter_gbk.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -21,6 +24,11 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   List<EpsonPrinterModel> printers = [];
+
+  // Define an encode to support print the specified language
+  Uint8List useEncode(String text) {
+    return tcvn.encode(text);
+  }
 
   @override
   void initState() {
@@ -78,12 +86,23 @@ class _MyAppState extends State<MyApp> {
                     contentPadding: EdgeInsets.all(0),
                     title: Text('${printer.model} | ${printer.series}'),
                     subtitle: Text('${printer.ipAddress}'),
-                    trailing: TextButton(
-                        onPressed: () {
-                          //onSetPrinterSetting(printer);
-                          onPrintTest(printer);
-                        },
-                        child: Text('Print Test')),
+                    trailing: Row(
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            //onSetPrinterSetting(printer);
+                            onPrintTest(printer);
+                          },
+                          child: Text('Print Test'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            onPrintTest(printer);
+                          },
+                          child: Text('Print Raw Text'),
+                        ),
+                      ],
+                    ),
                   );
                 },
                 itemCount: printers.length,
@@ -139,7 +158,8 @@ class _MyAppState extends State<MyApp> {
     // bytes += generator.text('Special 2: blåbærgrød',
     //     styles: const PosStyles(codeTable: 'CP1252'));
 
-    bytes += generator.text('Thoát nghe tim đập rộn ràng Cất lên tiếng,',
+    bytes += generator.textEncoded(
+        useEncode('Thoát nghe tim đập rộn ràng Cất lên tiếng,'),
         styles: const PosStyles(bold: true));
     // bytes +=
     //     generator.text('Reverse text', styles: const PosStyles(reverse: true));
@@ -147,8 +167,10 @@ class _MyAppState extends State<MyApp> {
     //     styles: const PosStyles(underline: true), linesAfter: 1);
     // bytes += generator.text('Align left',
     //     styles: const PosStyles(align: PosAlign.left));
-    bytes += generator.text('Đây hồ Than Thở ngất ngây',
-        styles: const PosStyles(align: PosAlign.center));
+
+    bytes += generator.setStyles(const PosStyles(align: PosAlign.center));
+    bytes += generator.textEncoded(useEncode('hồ Đây Than Thở ngất đây'));
+
     // bytes += generator.text('Align right',
     //     styles: const PosStyles(align: PosAlign.right), linesAfter: 1);
     // bytes += generator.qrcode('Barcode by escpos',
@@ -178,21 +200,42 @@ class _MyAppState extends State<MyApp> {
     //       height: PosTextSize.size2,
     //       width: PosTextSize.size2,
     //     ));
+    String base64String = base64Encode(bytes);
 
     bytes += generator.reset();
 
     return bytes;
   }
 
+  void onPrintRaw(EpsonPrinterModel printer) async {
+    EpsonEPOSCommand command = EpsonEPOSCommand();
+    List<Map<String, dynamic>> commands = [];
+    commands.add(command.addTextAlign(EpsonEPOSTextAlign.LEFT));
+    commands.add(command.addTextFont(EpsonEPOSFont.FONT_B));
+    // commands.add(command.addFeedLine(1));
+    commands.add(command.addTextStyle(bold: true));
+    commands
+        .add(command.append('Đây bước chân kẻ phong trần Lang thang cõi\n'));
+    commands.add(command.addTextStyle(bold: false));
+    // commands.add(command.append('ÀẢÃÁẠẶẬÈẺẼÉẸỆÌỈĨÍỊÒỎÕÓỌỘỜỞỠỚỢÙỦŨ ĂÂÊÔƠƯĐ\n'));
+    commands.add(command.rawData(Uint8List.fromList(await _customEscPos())));
+    commands.add(command.addFeedLine(1));
+    commands.add(command.addCut(EpsonEPOSCut.CUT_FEED));
+  }
+
   void onPrintTest(EpsonPrinterModel printer) async {
     EpsonEPOSCommand command = EpsonEPOSCommand();
     List<Map<String, dynamic>> commands = [];
     commands.add(command.addTextAlign(EpsonEPOSTextAlign.LEFT));
-    commands.add(command.addFeedLine(1));
+    commands.add(command.addTextFont(EpsonEPOSFont.FONT_B));
+    // commands.add(command.addFeedLine(1));
+    commands.add(command.addTextStyle(bold: true));
     commands
         .add(command.append('Đây bước chân kẻ phong trần Lang thang cõi\n'));
+    commands.add(command.addTextStyle(bold: false));
+    // commands.add(command.append('ÀẢÃÁẠẶẬÈẺẼÉẸỆÌỈĨÍỊÒỎÕÓỌỘỜỞỠỚỢÙỦŨ ĂÂÊÔƠƯĐ\n'));
     commands.add(command.rawData(Uint8List.fromList(await _customEscPos())));
-    commands.add(command.addFeedLine(2));
+    commands.add(command.addFeedLine(1));
     commands.add(command.addCut(EpsonEPOSCut.CUT_FEED));
     final response = await EpsonEPOS.onPrint(printer, commands);
     logger.d(response.toString());
