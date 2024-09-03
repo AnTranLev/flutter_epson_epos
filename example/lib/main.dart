@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:epson_epos/charset/charset.dart';
@@ -175,7 +174,7 @@ class _MyAppState extends State<MyApp> {
     // bytes += generator.qrcode('Barcode by escpos',
     //     size: QRSize.Size4, cor: QRCorrection.H);
     // bytes += generator.feed(2);
-
+    bytes += generator.barcode(Barcode.code128('barcodeData'.split('')));
     // bytes += generator.row([
     //   PosColumn(
     //     text: 'col3',
