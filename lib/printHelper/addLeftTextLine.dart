@@ -1,32 +1,34 @@
-String formatLabel(String label, int totalLength) {
-  // Add colon and space after the label
-  label = "$label: ";
+class AddLeftTextLine {
+  static String formatLabel(String label, int totalLength) {
+    // Add colon and space after the label
+    label = "$label: ";
 
-  // If the label is shorter than the total length, pad it with spaces
-  if (label.length < totalLength) {
-    label = label.padRight(totalLength);
-  } else if (label.length > totalLength) {
-    // Truncate the label if it exceeds the total length
-    label = label.substring(0, totalLength);
+    // If the label is shorter than the total length, pad it with spaces
+    if (label.length < totalLength) {
+      label = label.padRight(totalLength);
+    } else if (label.length > totalLength) {
+      // Truncate the label if it exceeds the total length
+      label = label.substring(0, totalLength);
+    }
+
+    return label;
   }
 
-  return label;
-}
+  static String formatTextLine(
+      {required String label, required String value, int totalLength = 42}) {
+    // Combine the label and value
+    String combined = '$label$value';
 
-String formatTextLine(
-    {required String label, required String value, int totalLength = 42}) {
-  // Combine the label and value
-  String combined = '$label$value';
+    // If the combined length is less than totalLength, pad the end with spaces
+    if (combined.length < totalLength) {
+      combined = combined.padRight(totalLength);
+    } else if (combined.length > totalLength) {
+      // If the combined length is more than totalLength, truncate it
+      combined = combined.substring(0, totalLength);
+    }
 
-  // If the combined length is less than totalLength, pad the end with spaces
-  if (combined.length < totalLength) {
-    combined = combined.padRight(totalLength);
-  } else if (combined.length > totalLength) {
-    // If the combined length is more than totalLength, truncate it
-    combined = combined.substring(0, totalLength);
+    return combined;
   }
-
-  return combined;
 }
 
 // String buildFormattedText(
