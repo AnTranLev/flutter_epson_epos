@@ -1,6 +1,6 @@
 Map<int, int> getFontACharsPerLine(String deviceName) {
   if (deviceName.startsWith('TM-m10')) {
-    return {58: 35, 60: 35};
+    return {80: 42, 58: 35, 60: 35};
   }
   if (deviceName.startsWith('TM-m30')) {
     return {80: 48, 58: 35, 60: 35};

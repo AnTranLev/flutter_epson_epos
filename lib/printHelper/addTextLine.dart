@@ -9,8 +9,8 @@ Map<String, dynamic> addTextLine(
   final printerCharsPerLinePerWidth = getFontACharsPerLine(printer.model ?? '');
   // final setting = await EpsonEPOS.getPrinterSetting(printer);
 
-  final charsPerLine = printerCharsPerLinePerWidth[DEFAULT_PAPER_WIDTH] ?? 80;
+  final charsPerLine = printerCharsPerLinePerWidth[DEFAULT_PAPER_WIDTH] ?? 42;
 
-  final text = spaceBetween((charsPerLine / 2).ceil(), params);
+  final text = spaceBetween((charsPerLine).ceil(), params);
   return EpsonEPOSCommand().append(text);
 }
