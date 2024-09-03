@@ -4,3 +4,4 @@ export './enums.dart';
 export './commands.dart';
 export './const.dart';
 export './helpers.dart';
+export './printHelper/addTextLine.dart';

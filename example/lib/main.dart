@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'package:epson_epos/charset/charset.dart';
 import 'package:epson_epos/epson_epos.dart';
 import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
-import 'package:esc_pos_utils_plus/gbk_codec/src/converter_gbk.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:permission_handler/permission_handler.dart';
