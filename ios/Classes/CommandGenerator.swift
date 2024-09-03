@@ -29,7 +29,7 @@ public class CommandGenerator: NSObject {
             
         case "printRawData":
             guard let commandValue = commandValue as? FlutterStandardTypedData
- else { return }
+            else { return }
             let data = Data(commandValue.data)
             //                    Log.d(logTag, "printRawData")
             printer.addCommand(data)
@@ -166,6 +166,58 @@ public class CommandGenerator: NSObject {
                 
                 printer.addTextStyle(reverseValue, ul: ulValue, em: emValue, color: colorValue)
             }
+            
+        case "addBarcode":
+            var barcodeWidth = 2
+            if let width = command["width"] as? Int {
+                barcodeWidth = width
+            }
+            var barcodeHeight = 100
+            if let height = command["height"] as? Int {
+                barcodeHeight = height
+            }
+            var barcode = ""
+            if let code = command["barcode"] as? String {
+                barcode = code
+            }
+            var type = EPOS2_BARCODE_CODE39.rawValue
+            if let codeType = command["type"] as? Int {
+                type = Int32(codeType)
+            }
+            var textPosition = EPOS2_HRI_BELOW.rawValue
+            if let position = command["position"] as? Int {
+                textPosition = Int32(position)
+            }
+            var font = EPOS2_FONT_A.rawValue
+            var fontValue = command["font"] as? String
+            switch fontValue {
+            case "FONT_A":
+                font = EPOS2_FONT_A.rawValue
+                
+            case "FONT_B":
+                font = EPOS2_FONT_B.rawValue
+                
+            case "FONT_C":
+                font = EPOS2_FONT_C.rawValue
+                
+            case "FONT_D":
+                font = EPOS2_FONT_D.rawValue
+                
+            case "FONT_E":
+                font = EPOS2_FONT_E.rawValue
+            default:
+                break
+            }
+            
+            printer.addBarcode(
+                barcode,
+                type: type,
+                hri: textPosition,
+                font: font,
+                width:barcodeWidth,
+                height:barcodeHeight
+            )
+            
         default:
             print("Command not supported \(commandId)")
             break

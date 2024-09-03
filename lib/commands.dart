@@ -70,4 +70,25 @@ class EpsonEPOSCommand {
       "color": color?.name,
     };
   }
+
+  Map<String, dynamic> addBarcode({
+    required String barcode,
+    Epos2Barcode type = Epos2Barcode.EPOS2_BARCODE_CODE39,
+    int? width,
+    int? height,
+    EpsonEPOSFont font = EpsonEPOSFont.FONT_A,
+    Epos2Hri position = Epos2Hri.EPOS2_HRI_BELOW,
+  }) {
+    final fontData = _enumText(font);
+
+    return {
+      "id": "addBarcode",
+      "barcode": barcode,
+      "width": width,
+      "height": height,
+      "font": fontData,
+      "position": position.value,
+      "type": type.value,
+    };
+  }
 }
