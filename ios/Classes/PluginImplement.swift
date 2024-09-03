@@ -50,6 +50,7 @@ class PluginImplement: NSObject {
         Timer.publish(every: Constants.discoverLookupInterval, on: .main, in: .common)
             .autoconnect()
             .first()
+            .receive(on: DispatchQueue.global())
             .sink(receiveValue: { [weak self] _ in
                 // Stop discover
                 Epos2Discovery.stop()
