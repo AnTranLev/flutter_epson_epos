@@ -614,6 +614,59 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
           mPrinter!!.addTextStyle(reverseValue, ulValue, emValue, colorValue)
         }
+
+         "addBarcode" -> {
+           val barcodeWidth = 2
+           if let width = command ["width"] as? Int {
+             barcodeWidth = width
+           }
+           val barcodeHeight = 100
+           if let height = command ["height"] as? Int {
+             barcodeHeight = height
+           }
+           val barcode = ""
+           if let code = command ["barcode"] as? String {
+             barcode = code
+           }
+           val type = Printer.BARCODE_EAN13
+           if let codeType = command ["type"] as? Int {
+             type = codeType
+           }
+           val textPosition = Printer.HRI_BELOW
+           if let position = command ["position"] as? Int {
+             textPosition = position)
+           }
+           val font = EPOS2_FONT_A.rawValue
+           val fontValue =
+             command["font"] as? String
+           switch fontValue {
+             case "FONT_A":
+             font = Printer.FONT_A
+
+             case "FONT_B":
+             font = Printer.FONT_B
+
+             case "FONT_C":
+             font = Printer.FONT_C
+
+             case "FONT_D":
+             font = Printer.FONT_D
+
+             case "FONT_E":
+             font = Printer.FONT_E
+             default:
+             break
+           }
+           Log.d(logTag, "addBarcode: \(barcode) \(barcodeWidth) \(barcodeHeight) \(type) \(textPosition) \(font)")
+           printer!!.addBarcode(
+             barcode,
+             type: type,
+             hri: textPosition,
+             font: font,
+             width: barcodeWidth,
+             height: barcodeHeight
+           )
+         }
       }
     }
   }
