@@ -73,7 +73,7 @@ class EpsonEPOSCommand {
 
   Map<String, dynamic> addBarcode({
     required String barcode,
-    Epos2Barcode type = Epos2Barcode.EPOS2_BARCODE_CODE39,
+    Epos2Barcode type = Epos2Barcode.EPOS2_BARCODE_EAN13,
     int? width,
     int? height,
     EpsonEPOSFont font = EpsonEPOSFont.FONT_A,

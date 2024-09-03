@@ -180,7 +180,7 @@ public class CommandGenerator: NSObject {
             if let code = command["barcode"] as? String {
                 barcode = code
             }
-            var type = EPOS2_BARCODE_CODE39.rawValue
+            var type = EPOS2_BARCODE_EAN13.rawValue
             if let codeType = command["type"] as? Int {
                 type = Int32(codeType)
             }
