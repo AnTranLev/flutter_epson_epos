@@ -234,6 +234,7 @@ class _MyAppState extends State<MyApp> {
     // commands.add(command.append('ÀẢÃÁẠẶẬÈẺẼÉẸỆÌỈĨÍỊÒỎÕÓỌỘỜỞỠỚỢÙỦŨ ĂÂÊÔƠƯĐ\n'));
     commands.add(command.rawData(Uint8List.fromList(await _customEscPos())));
     commands.add(command.addFeedLine(1));
+    commands.add(command.addBarcode(barcode: 'B1002345'));
     commands.add(command.addCut(EpsonEPOSCut.CUT_FEED));
     final response = await EpsonEPOS.onPrint(printer, commands);
     logger.d(response.toString());
