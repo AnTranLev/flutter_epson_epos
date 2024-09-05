@@ -56,58 +56,53 @@ class _MyAppState extends State<MyApp> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  // ElevatedButton(
-                  //     onPressed: () => onDiscovery(EpsonEPOSPortType.TCP),
-                  //     child: Text('Discovery TCP')),
-                  // ElevatedButton(
-                  //     onPressed: () => onDiscovery(EpsonEPOSPortType.USB),
-                  //     child: Text('Discovery USB')),
-                  ElevatedButton(
-                      onPressed: () => onDiscovery(EpsonEPOSPortType.BLUETOOTH),
-                      child: Text('Discovery Bluetooth')),
-                  // ElevatedButton(
-                  //     onPressed: () => onDiscovery(EpsonEPOSPortType.ALL),
-                  ElevatedButton(
-                      onPressed: () => onBleRequestPermission(),
-                      child: Text(
-                          'Request runtime permission')), //     child: Text('Discovery All')),
-                ],
-              ),
-              Flexible(
-                  child: ListView.builder(
+              // ElevatedButton(
+              //     onPressed: () => onDiscovery(EpsonEPOSPortType.TCP),
+              //     child: Text('Discovery TCP')),
+              // ElevatedButton(
+              //     onPressed: () => onDiscovery(EpsonEPOSPortType.USB),
+              //     child: Text('Discovery USB')),
+              ElevatedButton(
+                  onPressed: () => onDiscovery(EpsonEPOSPortType.BLUETOOTH),
+                  child: Text('Discovery Bluetooth')),
+              // ElevatedButton(
+              //     onPressed: () => onDiscovery(EpsonEPOSPortType.ALL),
+              ElevatedButton(
+                  onPressed: () => onBleRequestPermission(),
+                  child: Text(
+                      'Request runtime permission')), //     child: Text('Discovery All')),
+              ListView.builder(
                 itemBuilder: (BuildContext context, int index) {
                   final printer = printers[index];
-                  return ListTile(
-                    contentPadding: EdgeInsets.all(0),
-                    title: Text('${printer.model} | ${printer.series}'),
-                    subtitle: Text('${printer.ipAddress}'),
-                    trailing: Row(
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            //onSetPrinterSetting(printer);
-                            onPrintTest(printer);
-                          },
-                          child: Text('Print Test'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            onPrintTest(printer);
-                          },
-                          child: Text('Print Raw Text'),
-                        ),
-                      ],
-                    ),
+                  return Column(
+                    children: [
+                      Text('${printer.model} | ${printer.series}'),
+                      Text('${printer.ipAddress}'),
+                      Row(
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              //onSetPrinterSetting(printer);
+                              onPrintTest(printer);
+                            },
+                            child: Text('Print Test'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              onPrintTest(printer);
+                            },
+                            child: Text('Print Raw Text'),
+                          ),
+                        ],
+                      ),
+                    ],
                   );
                 },
                 itemCount: printers.length,
                 primary: false,
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
-              ))
+              )
             ],
           ),
         )),
@@ -118,6 +113,7 @@ class _MyAppState extends State<MyApp> {
   onDiscovery(EpsonEPOSPortType type) async {
     try {
       List<EpsonPrinterModel>? data = await EpsonEPOS.onDiscovery(type: type);
+      logger.d('Did discover ${data?.length}');
       if (data != null && data.length > 0) {
         data.forEach((element) {
           logger.d(element.toJson());
@@ -232,9 +228,15 @@ class _MyAppState extends State<MyApp> {
         .add(command.append('Đây bước chân kẻ phong trần Lang thang cõi\n'));
     commands.add(command.addTextStyle(bold: false));
     // commands.add(command.append('ÀẢÃÁẠẶẬÈẺẼÉẸỆÌỈĨÍỊÒỎÕÓỌỘỜỞỠỚỢÙỦŨ ĂÂÊÔƠƯĐ\n'));
-    commands.add(command.rawData(Uint8List.fromList(await _customEscPos())));
+    // commands.add(command.rawData(Uint8List.fromList(await _customEscPos())));
     commands.add(command.addFeedLine(1));
-    commands.add(command.addBarcode(barcode: '1002345'));
+    commands.add(command.addTextAlign(EpsonEPOSTextAlign.CENTER));
+    commands.add(command.addBarcode(
+      barcode: '0000081002345',
+      type: Epos2Barcode.EPOS2_BARCODE_EAN13,
+      position: Epos2Hri.EPOS2_HRI_ABOVE,
+      font: EpsonEPOSFont.FONT_B,
+    ));
     commands.add(command.addCut(EpsonEPOSCut.CUT_FEED));
     final response = await EpsonEPOS.onPrint(printer, commands);
     logger.d(response.toString());

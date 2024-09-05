@@ -462,27 +462,39 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       when (commandId) {
 
         "appendText" -> {
-          Log.d(logTag, "appendText: $commandValue")
+          Log.d(
+            logTag,
+            "appendText: $commandValue"
+          )
           mPrinter!!.addText(commandValue.toString());
         }
 
         "printRawData" -> {
-          try{
-          Log.d(logTag, "printRawData")
-          mPrinter!!.addCommand( commandValue as ByteArray)
+          try {
+            Log.d(logTag, "printRawData")
+            mPrinter!!.addCommand(commandValue as ByteArray)
           } catch (e: Exception) {
-            Log.e(logTag, "onGenerateCommand Error" + e.localizedMessage)
+            Log.e(
+              logTag,
+              "onGenerateCommand Error" + e.localizedMessage
+            )
           }
         }
 
         "addImage" -> {
           try {
-            var width: Int = command["width"] as Int
-            var height: Int = command["height"] as Int
+            var width: Int =
+              command["width"] as Int
+            var height: Int =
+              command["height"] as Int
             var posX: Int = command["posX"] as Int
             var posY: Int = command["posY"] as Int
-            val bitmap: Bitmap? = convertBase64toBitmap(commandValue as String)
-            Log.d(logTag, "appendBitmap: $width x $height $posX $posY bitmap $bitmap")
+            val bitmap: Bitmap? =
+              convertBase64toBitmap(commandValue as String)
+            Log.d(
+              logTag,
+              "appendBitmap: $width x $height $posX $posY bitmap $bitmap"
+            )
             Printer.SETTING_PAPERWIDTH_80_0
             mPrinter!!.addImage(
               bitmap,
@@ -497,66 +509,85 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
               Printer.COMPRESS_AUTO
             )
           } catch (e: Exception) {
-            Log.e(logTag, "onGenerateCommand Error" + e.localizedMessage)
+            Log.e(
+              logTag,
+              "onGenerateCommand Error" + e.localizedMessage
+            )
           }
         }
+
         "addFeedLine" -> {
           mPrinter!!.addFeedLine(commandValue as Int)
         }
+
         "addCut" -> {
           when (commandValue.toString()) {
             "CUT_FEED" -> {
               mPrinter!!.addCut(Printer.CUT_FEED)
             }
+
             "CUT_NO_FEED" -> {
               mPrinter!!.addCut(Printer.CUT_NO_FEED)
             }
+
             "CUT_RESERVE" -> {
               mPrinter!!.addCut(Printer.CUT_RESERVE)
             }
+
             else -> {
               mPrinter!!.addCut(Printer.PARAM_DEFAULT)
             }
           }
         }
+
         "addLineSpace" -> {
           mPrinter!!.addFeedLine(commandValue as Int)
         }
+
         "addTextAlign" -> {
           when (commandValue.toString()) {
             "LEFT" -> {
               mPrinter!!.addTextAlign(Printer.ALIGN_LEFT)
             }
+
             "CENTER" -> {
               mPrinter!!.addTextAlign(Printer.ALIGN_CENTER)
             }
+
             "RIGHT" -> {
               mPrinter!!.addTextAlign(Printer.ALIGN_RIGHT)
             }
+
             else -> {
               mPrinter!!.addTextAlign(Printer.PARAM_DEFAULT)
             }
           }
         }
+
         "addTextFont" -> {
           when (commandValue.toString()) {
             "FONT_A" -> {
               mPrinter!!.addTextFont(Printer.FONT_A)
             }
+
             "FONT_B" -> {
               mPrinter!!.addTextFont(Printer.FONT_B)
             }
+
             "FONT_C" -> {
               mPrinter!!.addTextFont(Printer.FONT_C)
             }
+
             "FONT_D" -> {
               mPrinter!!.addTextFont(Printer.FONT_D)
             }
+
             "FONT_E" -> {
               mPrinter!!.addTextFont(Printer.FONT_E)
             }
           }
         }
+
         "addTextSmooth" -> {
           if (commandValue as Boolean) {
             mPrinter!!.addTextSmooth(Printer.TRUE)
@@ -564,26 +595,33 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             mPrinter!!.addTextSmooth(Printer.FALSE)
           }
         }
+
         "addTextSize" -> {
           val width = command["width"] as Int
           val height = command["height"] as Int
-          Log.d(logTag, "setTextSize: width: $width, height: $height")
+          Log.d(
+            logTag,
+            "setTextSize: width: $width, height: $height"
+          )
           mPrinter!!.addTextSize(width, height)
         }
+
         "addTextStyle" -> {
-          val reverse = command["reverse"] as Boolean?
+          val reverse =
+            command["reverse"] as Boolean?
           val ul = command["ul"] as Boolean?
           val em = command["em"] as Boolean?
           val color = command["color"] as String?
 
-          val reverseValue = if (reverse != null) {
-            if (reverse) {
-              Printer.TRUE
-            } else
-              Printer.FALSE
-          } else {
-            Printer.PARAM_DEFAULT
-          }
+          val reverseValue =
+            if (reverse != null) {
+              if (reverse) {
+                Printer.TRUE
+              } else
+                Printer.FALSE
+            } else {
+              Printer.PARAM_DEFAULT
+            }
 
           val ulValue = if (ul != null) {
             if (ul) {
@@ -603,7 +641,7 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             Printer.PARAM_DEFAULT
           }
 
-          val colorValue = when(color) {
+          val colorValue = when (color) {
             "COLOR_NONE" -> Printer.COLOR_NONE
             "COLOR_1" -> Printer.COLOR_1
             "COLOR_2" -> Printer.COLOR_2
@@ -612,61 +650,71 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             else -> Printer.PARAM_DEFAULT
           }
 
-          mPrinter!!.addTextStyle(reverseValue, ulValue, emValue, colorValue)
+          mPrinter!!.addTextStyle(
+            reverseValue,
+            ulValue,
+            emValue,
+            colorValue
+          )
         }
 
-         "addBarcode" -> {
-           var barcodeWidth = 2
-           if let width = command["width"] as? Int {
-             barcodeWidth = width
-           }
-           var barcodeHeight = 100
-           if let height = command["height"] as? Int {
-             barcodeHeight = height
-           }
-           var barcode = ""
-           if let code = command["barcode"] as? String {
-             barcode = code
-           }
-           var type = Printer.BARCODE_EAN13
-           if let codeType = command["type"] as? Int {
-             type = codeType
-           }
-           var textPosition = Printer.HRI_BELOW
-           if let position = command["position"] as? Int {
-             textPosition = position)
-           }
-           var font = EPOS2_FONT_A.rawValue
-           val fontValue =
-             command["font"] as? String
-           switch fontValue {
-             case "FONT_A":
-             font = Printer.FONT_A
+        "addBarcode" -> {
+          var barcodeWidth = 2
+          val width = command["width"] as? Int
+          if (width != null) {
+            barcodeWidth = width
+          }
 
-             case "FONT_B":
-             font = Printer.FONT_B
+          var barcodeHeight = 100
+          val height = command["height"] as? Int
+          if (height != null) {
+            barcodeHeight = height
+          }
 
-             case "FONT_C":
-             font = Printer.FONT_C
+          var barcode = ""
+          val code = command["barcode"] as? String
+          if (code != null) {
+            barcode = code
+          }
 
-             case "FONT_D":
-             font = Printer.FONT_D
+          var type = Printer.BARCODE_EAN13
+          val codeType = command["type"] as? Int
+          if (codeType != null) {
+            type = codeType
+          }
 
-             case "FONT_E":
-             font = Printer.FONT_E
-             default:
-             break
-           }
-           Log.d(logTag, "addBarcode: \(barcode) \(barcodeWidth) \(barcodeHeight) \(type) \(textPosition) \(font)")
-           printer!!.addBarcode(
-             barcode,
-             type: type,
-             hri: textPosition,
-             font: font,
-             width: barcodeWidth,
-             height: barcodeHeight
-           )
-         }
+          var textPosition = Printer.HRI_BELOW
+          val position =
+            command["position"] as? Int
+          if (position != null) {
+            textPosition = position
+          }
+
+          var font =
+            Printer.FONT_A // Use the correct font value for Kotlin
+          val fontValue =
+            command["font"] as? String
+          when (fontValue) {
+            "FONT_A" -> font = Printer.FONT_A
+            "FONT_B" -> font = Printer.FONT_B
+            "FONT_C" -> font = Printer.FONT_C
+            "FONT_D" -> font = Printer.FONT_D
+            "FONT_E" -> font = Printer.FONT_E
+          }
+
+          Log.d(
+            logTag,
+            "addBarcode: $barcode $barcodeWidth $barcodeHeight $type $textPosition $font"
+          )
+          mPrinter?.addBarcode(
+            barcode,
+            type,
+            textPosition,
+            font,
+            barcodeWidth,
+            barcodeHeight
+          )
+        }
       }
     }
   }
