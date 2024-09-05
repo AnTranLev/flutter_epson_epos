@@ -61,7 +61,7 @@ class PluginImplement: NSObject {
                 
                 // return the result
                 var resp = EpsonEposPrinterResult.init(type: PluginMethods.onDiscovery.rawValue, success: true)
-                resp.content = printers
+                resp.content = self.printers
                 do {
                     let data = try resp.toJSONString()
                     result(data)
