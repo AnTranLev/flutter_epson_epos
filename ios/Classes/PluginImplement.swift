@@ -215,8 +215,8 @@ extension PluginImplement: Epos2PtrReceiveDelegate {
             //      Log.d(logTag, resp.toJSON())
             result(try resp.toJSONString());
         } catch let error {
-                 ex.printStackTrace()
-                 Log.e(logTag, "sendData Error" + ex.errorStatus, ex)
+//                  ex.printStackTrace()
+//                  Log.e(logTag, "sendData Error" + ex.errorStatus, ex)
 //             disconnectPrinter()
         }
     }
