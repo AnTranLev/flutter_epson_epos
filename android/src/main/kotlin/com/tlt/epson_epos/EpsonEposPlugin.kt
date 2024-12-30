@@ -48,7 +48,7 @@ class EpsonEposPrinterInfo(
   var model: String? = null,
   var type: String? = null,
   var printType: String? = null,
-  var target: String? =null
+  var target: String? = null
 ) : JSONConvertable
 
 data class EpsonEposPrinterResult(
@@ -128,24 +128,31 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         "onDiscovery" -> {
           onDiscovery(call, result)
         }
+
         "onPrint" -> {
           onPrint(call, result)
         }
+
         "onGetPrinterInfo" -> {
           onGetPrinterInfo(call, result)
         }
+
         "isPrinterConnected" -> {
           isPrinterConnected(call, result)
         }
+
         "getPrinterSetting" -> {
           getPrinterSetting(call, result)
         }
+
         "setPrinterSetting" -> {
           setPrinterSetting(call, result)
         }
+
         "requestRuntimePermission" -> {
           requestRuntimePermission(call, result)
         }
+
         else -> {
           Log.d(logTag, "Method: ${call.method} is not supported yet")
           result.notImplemented()
@@ -195,15 +202,19 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       "TCP" -> {
         onDiscoveryPrinter(call, Discovery.PORTTYPE_TCP, result)
       }
+
       "USB" -> {
         onDiscoveryPrinter(call, Discovery.PORTTYPE_USB, result)
       }
+
       "BT" -> {
         onDiscoveryPrinter(call, Discovery.PORTTYPE_BLUETOOTH, result)
       }
+
       "ALL" -> {
         onDiscoveryPrinter(call, Discovery.TYPE_PRINTER, result)
       }
+
       else -> result.notImplemented()
     }
   }
@@ -211,9 +222,13 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
   /**
    * Discovery Printers GENERIC
    */
-  private fun onDiscoveryPrinter(@NonNull call: MethodCall, portType: Int, @NonNull result: Result) {
-    var delay:Long = 7000;
-    if(portType == Discovery.PORTTYPE_USB){
+  private fun onDiscoveryPrinter(
+    @NonNull call: MethodCall,
+    portType: Int,
+    @NonNull result: Result
+  ) {
+    var delay: Long = 7000;
+    if (portType == Discovery.PORTTYPE_USB) {
       delay = 1000;
     }
     printers.clear()
@@ -239,8 +254,6 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       result.success(resp.toJSON())
     }
   }
-
-
 
 
   private fun onGetPrinterInfo(@NonNull call: MethodCall, @NonNull result: Result) {
@@ -386,7 +399,15 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
   private val mDiscoveryListener = DiscoveryListener { deviceInfo ->
     Log.d(logTag, "Found: ${deviceInfo?.deviceName}")
     if (deviceInfo?.deviceName != null && deviceInfo?.deviceName != "") {
-      var printer = EpsonEposPrinterInfo(deviceInfo.ipAddress,  deviceInfo.bdAddress , deviceInfo.macAddress,  deviceInfo.deviceName , deviceInfo.deviceType.toString(), deviceInfo.deviceType.toString()  , deviceInfo.target)
+      var printer = EpsonEposPrinterInfo(
+        deviceInfo.ipAddress,
+        deviceInfo.bdAddress,
+        deviceInfo.macAddress,
+        deviceInfo.deviceName,
+        deviceInfo.deviceType.toString(),
+        deviceInfo.deviceType.toString(),
+        deviceInfo.target
+      )
       var printerIndex = printers.indexOfFirst { e -> e.ipAddress == deviceInfo.ipAddress }
       if (printerIndex > -1) {
         printers[printerIndex] = printer
@@ -606,6 +627,18 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
           mPrinter!!.addTextSize(width, height)
         }
 
+        "addKick" -> {
+          mPrinter!!.addCommand(
+            byteArrayOf(
+              27.toByte(), // ESC
+              112.toByte(),
+              0.toByte(),
+              25.toByte(),
+              250.toByte()
+            )
+          )
+        }
+
         "addTextStyle" -> {
           val reverse =
             command["reverse"] as Boolean?
@@ -759,57 +792,57 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     var errorMes = "";
     val status: PrinterStatusInfo? = mPrinter!!.status;
 
-    if (status?.online == Printer.FALSE){
+    if (status?.online == Printer.FALSE) {
       errorMes = getErrorMessage("err_offline")
     }
 
-    if (status?.connection == Printer.FALSE){
+    if (status?.connection == Printer.FALSE) {
       errorMes = getErrorMessage("err_no_response")
     }
 
-    if (status?.coverOpen == Printer.TRUE){
+    if (status?.coverOpen == Printer.TRUE) {
       errorMes = getErrorMessage("err_cover_open")
     }
 
-    if (status?.paper == Printer.PAPER_EMPTY){
+    if (status?.paper == Printer.PAPER_EMPTY) {
       errorMes = getErrorMessage("err_receipt_end")
     }
 
-    if (status?.paperFeed == Printer.TRUE || status?.panelSwitch == Printer.SWITCH_ON){
+    if (status?.paperFeed == Printer.TRUE || status?.panelSwitch == Printer.SWITCH_ON) {
       errorMes = getErrorMessage("err_paper_feed")
     }
 
-    if (status?.errorStatus == Printer.UNRECOVER_ERR){
+    if (status?.errorStatus == Printer.UNRECOVER_ERR) {
       errorMes = getErrorMessage("err_unrecover")
     }
 
-    if (status?.errorStatus == Printer.MECHANICAL_ERR || status?.errorStatus == Printer.AUTOCUTTER_ERR){
+    if (status?.errorStatus == Printer.MECHANICAL_ERR || status?.errorStatus == Printer.AUTOCUTTER_ERR) {
       errorMes = getErrorMessage("err_autocutter")
       errorMes = getErrorMessage("err_need_recover")
     }
 
-    if (status?.errorStatus == Printer.AUTORECOVER_ERR){
-      if (status?.autoRecoverError == Printer.HEAD_OVERHEAT){
+    if (status?.errorStatus == Printer.AUTORECOVER_ERR) {
+      if (status?.autoRecoverError == Printer.HEAD_OVERHEAT) {
         errorMes = getErrorMessage("err_overheat")
         errorMes = getErrorMessage("err_head")
       }
-      if (status?.autoRecoverError == Printer.MOTOR_OVERHEAT){
+      if (status?.autoRecoverError == Printer.MOTOR_OVERHEAT) {
         errorMes = getErrorMessage("err_overheat")
         errorMes = getErrorMessage("err_motor")
       }
-      if (status?.autoRecoverError == Printer.BATTERY_OVERHEAT){
+      if (status?.autoRecoverError == Printer.BATTERY_OVERHEAT) {
         errorMes = getErrorMessage("err_overheat")
         errorMes = getErrorMessage("err_battery")
       }
-      if (status?.autoRecoverError == Printer.WRONG_PAPER){
+      if (status?.autoRecoverError == Printer.WRONG_PAPER) {
         errorMes = getErrorMessage("err_wrong_paper")
       }
     }
-    if (status?.batteryLevel == Printer.BATTERY_LEVEL_0){
+    if (status?.batteryLevel == Printer.BATTERY_LEVEL_0) {
       errorMes = getErrorMessage("err_battery_real_end")
     }
 
-    if(errorMes == ""){
+    if (errorMes == "") {
       return getErrorMessage("");
     }
     return errorMes
@@ -820,51 +853,67 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       "warn_receipt_near_end" -> {
         "Roll paper is nearly end."
       }
+
       "warn_battery_near_end" -> {
         "Battery level of printer is low."
       }
+
       "err_no_response" -> {
         "Please check the connection of the printer and the mobile terminal.\nConnection get lost."
       }
+
       "err_cover_open" -> {
         "Please close roll paper cover."
       }
+
       "err_receipt_end" -> {
         "Please check roll paper."
       }
+
       "err_paper_feed" -> {
         "Please release a paper feed switch."
       }
+
       "err_autocutter" -> {
         "Please remove jammed paper and close roll paper cover.\nRemove any jammed paper or foreign substances in the printer, and then turn the printer off and turn the printer on again."
       }
+
       "err_need_recover" -> {
         "Then, If the printer doesn\'t recover from error, please cycle the power switch."
       }
+
       "err_unrecover" -> {
         "Please cycle the power switch of the printer.\nIf same errors occurred even power cycled, the printer may out of orde"
       }
+
       "err_overheat" -> {
         "Please wait until error LED of the printer turns off. "
       }
+
       "err_head" -> {
         "Print head of printer is hot."
       }
+
       "err_motor" -> {
         "Motor Driver IC of printer is hot."
       }
+
       "err_battery" -> {
         "Battery of printer is hot."
       }
+
       "err_wrong_paper" -> {
         "Please set correct roll paper."
       }
+
       "err_battery_real_end" -> {
         "Please connect AC adapter or change the battery.\nBattery of printer is almost empty."
       }
+
       "err_offline" -> {
         "Printer is offline."
       }
+
       else -> "Unknown error. Please check the power and communication status of the printer."
     }
     if (withNewLine) {

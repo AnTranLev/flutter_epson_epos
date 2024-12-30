@@ -60,6 +60,10 @@ class EpsonEPOSCommand {
     return {"id": "addTextSize", "width": width, "height": height};
   }
 
+  Map<String, dynamic> addKick() {
+    return {"id": "addKick"};
+  }
+
   Map<String, dynamic> addTextStyle(
       {bool? reverse, bool? underline, bool? bold, EpsonEPOSColor? color}) {
     return {

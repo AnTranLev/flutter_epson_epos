@@ -218,6 +218,12 @@ public class CommandGenerator: NSObject {
                 height:barcodeHeight
             )
             
+        case "addKick":
+            let drawerPin: Int = (command["drawerPin"] as? Int) ?? 0
+            let pulseOn: Int = (command["pulseOn"] as? Int) ?? 100
+            let pulseOff: Int = (command["pulseOff"] as? Int) ?? 100
+            printer.addPulse(drawerPin, time: EPOS2_PULSE_100MS.rawValue * pulseOn / 100)
+
         default:
             print("Command not supported \(commandId)")
             break
