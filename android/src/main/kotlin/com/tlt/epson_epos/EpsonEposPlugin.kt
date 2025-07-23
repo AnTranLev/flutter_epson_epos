@@ -633,8 +633,8 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
               27.toByte(), // ESC
               112.toByte(),
               0.toByte(),
-              25.toByte(),
-              250.toByte()
+              60.toByte(),
+              120.toByte()
             )
           )
         }
