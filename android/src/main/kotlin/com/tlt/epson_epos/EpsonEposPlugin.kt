@@ -323,7 +323,7 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         }
         settingList[Printer.SETTING_PAPERWIDTH] = pw
         try {
-          mPrinter!!.setPrinterSetting(Printer.PARAM_DEFAULT, settingList, mPrinterSettingListener)
+          mPrinter!!.setPrinterSetting(30000, settingList, mPrinterSettingListener)
         } catch (ex: Exception) {
           Log.e(logTag, "sendData Error", ex)
           ex.printStackTrace()
@@ -373,7 +373,7 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             logTag,
             "Printing $target $series Connection: ${statusInfo?.connection} online: ${statusInfo?.online} cover: ${statusInfo?.coverOpen} Paper: ${statusInfo?.paper} ErrorSt: ${statusInfo?.errorStatus} Battery Level: ${statusInfo?.batteryLevel}"
           )
-          mPrinter!!.sendData(Printer.PARAM_DEFAULT)
+          mPrinter!!.sendData(15000)
           Log.d(logTag, "Printed $target $series")
 
           resp.success = true
