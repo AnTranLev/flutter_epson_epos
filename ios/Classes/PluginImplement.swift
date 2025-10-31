@@ -27,10 +27,18 @@ class PluginImplement: NSObject {
     }
     
     override init() {
-        filterOption.deviceType = EPOS2_TYPE_PRINTER.rawValue
+        filterOption.deviceType = EPOS2_TYPE_ALL.rawValue
+        filterOption.deviceModel = EPOS2_MODEL_ALL.rawValue
     }
     
     public func onDiscovery(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        if let args = call.arguments as? [String: Any] { // Cast to the expected type
+            print("Discovery args: \(args)")
+                let type = args["type"] as? Int32 ?? EPOS2_PORTTYPE_ALL.rawValue
+                filterOption.portType = type
+            } else {
+                filterOption.portType = EPOS2_PORTTYPE_ALL.rawValue
+            }
         let operation = OperationQueue()
         operation.addOperation { [weak self] in
             self?._onDiscovery(call, result: result)
@@ -40,7 +48,7 @@ class PluginImplement: NSObject {
     private func _onDiscovery(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         self.result = result
         let response = Epos2Discovery.start(filterOption, delegate: self)
-        
+        print("Epos2Discovery.start response: \(response) | printers count: \(printers.count)")
         let resp = EpsonEposPrinterResult.init(type: PluginMethods.onDiscovery.rawValue, success: false)
         if response != EPOS2_SUCCESS.rawValue {
             resp.message = MessageHelper.errorEpos(response, method: "start")
@@ -138,6 +146,7 @@ private extension PluginImplement {
 
 extension PluginImplement: Epos2DiscoveryDelegate {
     func onDiscovery(_ deviceInfo: Epos2DeviceInfo!) {
+        print("Discovered device: \(deviceInfo.deviceName ?? "Unknown") at \(deviceInfo.ipAddress ?? "No IP")")
         guard let printer = EpsonEposPrinterInfo.printer(from: deviceInfo) else {
             return
         }

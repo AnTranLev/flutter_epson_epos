@@ -23,14 +23,14 @@ class EpsonEPOS {
 
   static Future<List<EpsonPrinterModel>?> onDiscovery(
       {EpsonEPOSPortType type = EpsonEPOSPortType.ALL}) async {
+    print("FINDING EPSON PRINTER");
     if (!_isPrinterPlatformSupport(throwError: true)) return null;
-    String printType = _eposHelper.getPortType(type);
+    dynamic printType = _eposHelper.getPortType(type, returnInt: Platform.isIOS);
     final Map<String, dynamic> params = {"type": printType};
     String? rep = await _channel.invokeMethod('onDiscovery', params);
     if (rep != null) {
-      try {
         final response = EpsonPrinterResponse.fromRawJson(rep);
-
+        print("onDiscovery: $response");
         List<dynamic>? prs = response.content;
         if (prs == null) {
           return [];
@@ -43,7 +43,7 @@ class EpsonEPOS {
               ipAddress: e['ipAddress'],
               bdAddress: e['bdAddress'],
               macAddress: e['macAddress'],
-              type: printType,
+              type: printType.toString(),
               model: modelName,
               series: modelSeries?.id,
               target: e['target'],
@@ -52,9 +52,6 @@ class EpsonEPOS {
         } else {
           return [];
         }
-      } catch (e) {
-        throw e;
-      }
     }
     return [];
   }

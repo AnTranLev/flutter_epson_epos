@@ -212,7 +212,7 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       }
 
       "ALL" -> {
-        onDiscoveryPrinter(call, Discovery.TYPE_PRINTER, result)
+        onDiscoveryPrinter(call, Discovery.TYPE_ALL, result)
       }
 
       else -> result.notImplemented()

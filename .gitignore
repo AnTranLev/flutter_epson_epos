@@ -75,7 +75,6 @@ pubspec.lock
 .env
 *.app.dSYM.zip
 *.ipa
-.fvm
 
 #amplify-do-not-edit-begin
 amplify/\#current-cloud-backend
@@ -99,3 +98,6 @@ amplifytools.xcconfig
 **.sample
 #amplify-do-not-edit-end
 Podfile.lock
+
+# FVM Version Cache
+.fvm/

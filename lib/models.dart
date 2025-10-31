@@ -160,4 +160,9 @@ class EpsonPrinterResponse {
         "message": message == null ? null : message,
         "content": content == null ? null : content,
       };
+
+  @override
+  String toString() {
+    return 'EpsonPrinterResponse(type: $type, success: $success, message: $message, content: $content)';
+  }
 }

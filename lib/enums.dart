@@ -1,4 +1,9 @@
-enum EpsonEPOSPortType { ALL, TCP, BLUETOOTH, USB }
+enum EpsonEPOSPortType {
+  ALL(0), TCP(1), BLUETOOTH(2), USB(3), BLE_LE(4);
+  final int value;
+
+  const EpsonEPOSPortType(this.value);
+}
 
 enum EpsonEPOSPrintLang {
   MODEL_ANK,
