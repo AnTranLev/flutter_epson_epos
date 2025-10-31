@@ -95,4 +95,42 @@ class EpsonEPOSCommand {
       "type": type.value,
     };
   }
+
+  Map<String, dynamic> addPageBegin() {
+    return {"id": "addPageBegin"};
+  }
+
+  Map<String, dynamic> addPageEnd() {
+    return {"id": "addPageEnd"};
+  }
+
+  Map<String, dynamic> addPageArea({
+    required int x,
+    required int y,
+    required int width,
+    required int height,
+  }) {
+    return {
+      "id": "addPageArea",
+      "value": {
+        "x": x,
+        "y": y,
+        "w": width,
+        "h": height,
+      }
+    };
+  }
+
+  Map<String, dynamic> addPagePosition({
+    required int x,
+    required int y,
+  }) {
+    return {
+      "id": "addPagePosition",
+      "value": {
+        "x": x,
+        "y": y,
+      }
+    };
+  }
 }

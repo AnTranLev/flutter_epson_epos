@@ -217,7 +217,25 @@ public class CommandGenerator: NSObject {
                 width:barcodeWidth,
                 height:barcodeHeight
             )
+        case "addPageBegin":
+            printer.addPageBegin()
             
+        case "addPageArea":
+            guard let commandValue = commandValue as? Dictionary<String, Any>,
+                  let x = commandValue["x"] as? Int,
+                  let y = commandValue["y"] as? Int,
+                  let w = commandValue["w"] as? Int,
+                  let h = commandValue["h"] as? Int else { return }
+            printer.addPageArea(x, y: y, width: w, height: h)
+            
+        case "addPageEnd":
+            printer.addPageEnd()
+            
+        case "addPagePosition":
+            guard let commandValue = commandValue as? Dictionary<String, Any>,
+                  let x = commandValue["x"] as? Int,
+                  let y = commandValue["y"] as? Int else { return }
+            printer.addPagePosition(x, y: y)
         case "addKick":
             printer.addPulse(EPOS2_DRAWER_2PIN.rawValue, time: EPOS2_PULSE_200.rawValue * 100 / 100)
 

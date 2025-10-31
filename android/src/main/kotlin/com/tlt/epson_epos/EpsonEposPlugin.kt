@@ -260,11 +260,11 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     Log.d(logTag, "onGetPrinterInfo $call $result")
   }
 
-  private fun isPrinterConnected(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun isPrinterConnected(call: MethodCall, result: Result) {
     Log.d(logTag, "isPrinterConnected $call $result")
   }
 
-  private fun getPrinterSetting(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun getPrinterSetting(call: MethodCall, result: Result) {
     Log.d(logTag, "getPrinterSetting $call $result")
 
     val type: String = call.argument<String>("type") as String
@@ -291,7 +291,7 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
   }
 
-  private fun setPrinterSetting(@NonNull call: MethodCall, @NonNull result: Result) {
+  private fun setPrinterSetting(call: MethodCall, result: Result) {
     Log.d(logTag, "setPrinterSetting $call $result")
 
     val type: String = call.argument<String>("type") as String
@@ -476,9 +476,9 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     Log.d(logTag, "onGenerateCommand: $command")
     val textData = StringBuilder()
 
-    var commandId: String = command["id"] as String
-    if (!commandId.isNullOrEmpty()) {
-      var commandValue = command["value"]
+    val commandId: String = command["id"] as String
+    if (commandId.isNotEmpty()) {
+      val commandValue = command["value"]
 
       when (commandId) {
 
@@ -504,19 +504,19 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
         "addImage" -> {
           try {
-            var width: Int =
+            val width: Int =
               command["width"] as Int
-            var height: Int =
+            val height: Int =
               command["height"] as Int
-            var posX: Int = command["posX"] as Int
-            var posY: Int = command["posY"] as Int
+            val posX: Int = command["posX"] as Int
+            val posY: Int = command["posY"] as Int
             val bitmap: Bitmap? =
               convertBase64toBitmap(commandValue as String)
             Log.d(
               logTag,
               "appendBitmap: $width x $height $posX $posY bitmap $bitmap"
             )
-            Printer.SETTING_PAPERWIDTH_80_0
+//            Printer.SETTING_PAPERWIDTH_80_0
             mPrinter!!.addImage(
               bitmap,
               posX,
@@ -563,6 +563,29 @@ class EpsonEposPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
         "addLineSpace" -> {
           mPrinter!!.addFeedLine(commandValue as Int)
+        }
+
+        "addPageBegin" -> {
+          mPrinter!!.addPageBegin()
+        }
+
+        "addPageArea" -> {
+          val v = commandValue as Map<*,*>
+          val x = v["x"] as Int
+          val y = v["y"] as Int
+          val w = v["w"] as Int
+          val h = v["h"] as Int
+          mPrinter!!.addPageArea(x,y,w,h)
+        }
+
+        "addPageEnd" -> {
+          mPrinter!!.addPageEnd()
+        }
+        "addPagePosition" -> {
+          val v = commandValue as Map<*,*>
+          val x = v["x"] as Int
+          val y = v["y"] as Int
+          mPrinter!!.addPagePosition(x,y)
         }
 
         "addTextAlign" -> {
